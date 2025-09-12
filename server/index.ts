@@ -1,7 +1,11 @@
 import { Hono } from 'hono'
-import { serve } from '@hono/node-server'
+import { serve, type HttpBindings } from '@hono/node-server'
 
-const app = new Hono()
+const app = new Hono<{Bindings: HttpBindings}>
 
-app.get('/', (c) => c.text('Hono!'))
+app.all('/announce', (c) => {
+    let ip = c.env.incoming.socket.remoteAddress
+    console.log(ip)
+    return c.text("", 200)
+})
 serve(app)
