@@ -15,21 +15,21 @@ impl Peer {
     }
 }
 
-#[repr(u8)]
-pub enum PeerMessageType {
-    Announcement = 67,
-    ValueUpdate = 68,
-    SumAnnouncement = 69
-}
-
-pub struct PeerMessage {
-    peer: Peer,
-    version: u32,
-    message: u32,
+pub enum PeerMessage {
+    Announcement,
+    ValueUpdate { new_val: u32 },
+    SumAnnouncement { sum: u64 },
 }
 
 impl PeerMessage {
-    pub fn announce() {
-
+    pub fn from_bytes(buf: &[u8]) -> Option<Self> {
+        match buf[0] {
+            67 => Some(PeerMessage::Announcement),
+            68 => Some(PeerMessage::ValueUpdate { new_val: u32::from_be_bytes(buf[0..4].try_into().unwrap()) }),
+            69 => Some(PeerMessage::SumAnnouncement { sum: u64::from_be_bytes(buf[0..8].try_into().unwrap()) }),
+            _ => None,
+        }
     }
+    
+    pub fn announce() {}
 }
