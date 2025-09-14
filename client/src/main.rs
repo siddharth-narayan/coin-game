@@ -2,8 +2,9 @@ use std::net::{IpAddr, SocketAddr, UdpSocket};
 
 use reqwest::{Url, blocking::Response};
 use stunclient::just_give_me_the_udp_socket_and_its_external_address as socket_and_addr;
+use rand::prelude::*;
 
-use crate::peer::Peer;
+use crate::peer::{Peer, PeerMessageType};
 
 mod peer;
 
@@ -69,11 +70,27 @@ impl Server {
         }        
     }
 
+    pub fn send_choice(&self, choice: bool) {
+        let mut rng = rand::rng();
+        let player_count = self.peers.len();
+        
+        let mut numbers: Vec<u32> = vec![0; player_count];
+        numbers = numbers.iter().map(|num| {
+            rng.random::<u32>() + (choice as u32)
+        }).collect();
+
+        for (index, peer) in self.peers.iter().enumerate() {
+            let buf:Vec<u8> = vec![5];
+            self.socket.send_to(buf.as_slice(), peer.addr);
+        }
+        
+    }
+
     fn recv_message(&mut self, buf: &[u8], peer_addr: SocketAddr, len: usize) {
         let peer = self.peers.iter_mut().find(|peer| peer.addr.ip() == peer_addr.ip());
 
         if peer.is_none() {
-            if buf[0] == 67 {
+            if buf[0] == PeerMessageType::Announcement {
                 self.peers.push(Peer::new(peer_addr));
                 return;
             }

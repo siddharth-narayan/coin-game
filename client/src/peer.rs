@@ -15,9 +15,11 @@ impl Peer {
     }
 }
 
+#[repr(u8)]
 pub enum PeerMessageType {
-    Announcement,
-    ValueUpdate,
+    Announcement = 67,
+    ValueUpdate = 68,
+    SumAnnouncement = 69
 }
 
 pub struct PeerMessage {
@@ -27,5 +29,7 @@ pub struct PeerMessage {
 }
 
 impl PeerMessage {
-    pub fn from_bytes(bytes: [u8; 16]) {}
+    pub fn announce() {
+
+    }
 }
